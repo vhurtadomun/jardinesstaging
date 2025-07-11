@@ -311,8 +311,19 @@ with tab2:
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            total_usuarios = df_mixpanel['user'].nunique()
-            st.metric("Total Usuarios", total_usuarios)
+            # Combinar usuarios únicos de Mixpanel y Postgres
+            usuarios_mixpanel = set(df_mixpanel['user'].dropna())
+            
+            # Leer datos de Postgres
+            try:
+                df_postgres = pd.read_csv('inputs/postgres_applicants_collapsed.csv')
+                usuarios_postgres = set(df_postgres['user'].dropna())
+            except:
+                usuarios_postgres = set()
+            
+            # Combinar y contar únicos
+            total_usuarios_unicos = len(usuarios_mixpanel.union(usuarios_postgres))
+            st.metric("Total Usuarios", total_usuarios_unicos)
             
         with col2:
             total_applicants = df_mixpanel['applicant_id'].nunique()
@@ -324,7 +335,7 @@ with tab2:
             st.metric("Total Interacciones", f"{total_interacciones:,}")
             
         with col4:
-            avg_interacciones = total_interacciones / total_usuarios if total_usuarios > 0 else 0
+            avg_interacciones = total_interacciones / total_usuarios_unicos if total_usuarios_unicos > 0 else 0
             st.metric("Promedio Interacciones/Usuario", f"{avg_interacciones:.1f}")
         
         # Análisis de comportamiento
