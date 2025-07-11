@@ -525,17 +525,7 @@ with tab2:
                 )
                 st.plotly_chart(fig_favoritos_mapa, use_container_width=True)
             
-            # Estadísticas por área de favoritos
-            if 'area_id' in df_favorites.columns:
-                st.subheader('🏘️ Favoritos por Área')
-                favoritos_por_area = df_favorites.groupby('area_id')['total_favorites'].sum().sort_values(ascending=False)
-                
-                fig_favoritos_area = px.bar(
-                    x=favoritos_por_area.index,
-                    y=favoritos_por_area.values,
-                    title="Total de Favoritos por Área ID"
-                )
-                st.plotly_chart(fig_favoritos_area, use_container_width=True)
+
                 
         except FileNotFoundError:
             st.error("No se encontró el archivo favorite_collapsed.csv")
@@ -628,20 +618,7 @@ with tab2:
                 )
                 st.plotly_chart(fig_exploracion_mapa, use_container_width=True)
             
-            # Estadísticas por área de exploración
-            if 'area_id' in df_explored.columns:
-                st.subheader('🏘️ Exploración por Área')
-                exploracion_por_area = df_explored.groupby('area_id').agg({
-                    'click_campus_card': 'sum',
-                    'click_campus_pin': 'sum'
-                }).sum(axis=1).sort_values(ascending=False)
-                
-                fig_exploracion_area = px.bar(
-                    x=exploracion_por_area.index,
-                    y=exploracion_por_area.values,
-                    title="Total de Exploraciones por Área ID"
-                )
-                st.plotly_chart(fig_exploracion_area, use_container_width=True)
+
                 
         except FileNotFoundError:
             st.error("No se encontró el archivo explored_campus_collapsed.csv")
