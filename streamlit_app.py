@@ -443,31 +443,7 @@ with tab2:
             fig_usuarios.update_layout(height=400)
             st.plotly_chart(fig_usuarios, use_container_width=True)
         
-        # Análisis geográfico
-        st.subheader('Análisis Geográfico')
-        
-        # Crear mapa de calor de actividad
-        if 'lat' in df_mixpanel.columns and 'lng' in df_mixpanel.columns:
-            # Calcular actividad total por ubicación
-            df_mixpanel['actividad_total'] = df_mixpanel[['click_dashboard_menu', 'click_school_pin', 
-                                                         'open_school_profile', 'favorite_school_from_list']].sum(axis=1)
-            
-            fig_mapa = px.scatter_mapbox(
-                df_mixpanel,
-                lat='lat',
-                lon='lng',
-                size='actividad_total',
-                color='actividad_total',
-                hover_name='formatted_address',
-                zoom=10,
-                title="Mapa de Actividad de Usuarios",
-                color_continuous_scale='Blues'
-            )
-            fig_mapa.update_layout(
-                mapbox_style="open-street-map",
-                height=500
-            )
-            st.plotly_chart(fig_mapa, use_container_width=True)
+
         
         # Estadísticas por área
         if 'area_id' in df_mixpanel.columns:
@@ -636,29 +612,7 @@ with tab2:
                 fig_exploradores.update_layout(height=400)
                 st.plotly_chart(fig_exploradores, use_container_width=True)
             
-            # Análisis geográfico de exploración
-            st.subheader('Exploración por Ubicación')
-            
-            if 'lat' in df_explored.columns and 'lng' in df_explored.columns:
-                # Calcular actividad total de exploración
-                df_explored['actividad_exploracion'] = df_explored['click_campus_card'] + df_explored['click_campus_pin']
-                
-                fig_exploracion_mapa = px.scatter_mapbox(
-                    df_explored,
-                    lat='lat',
-                    lon='lng',
-                    size='actividad_exploracion',
-                    color='actividad_exploracion',
-                    hover_name='formatted_address',
-                    zoom=10,
-                    title="Mapa de Exploración de Campus por Usuario",
-                    color_continuous_scale='Greens'
-                )
-                fig_exploracion_mapa.update_layout(
-                    mapbox_style="open-street-map",
-                    height=500
-                )
-                st.plotly_chart(fig_exploracion_mapa, use_container_width=True)
+
             
 
                 
