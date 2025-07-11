@@ -531,6 +531,92 @@ with tab2:
         except Exception as e:
             st.error(f"Error al procesar los datos de exploración: {e}")
         
+        # Análisis de Favoritos
+        st.subheader('Análisis de Favoritos')
+        
+        try:
+            df_favorites = pd.read_csv('inputs/favorite_collapsed.csv')
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                total_favoritos = df_favorites['total_favorites'].sum()
+                st.metric("Total Favoritos", f"{total_favoritos:,}")
+                
+            with col2:
+                usuarios_con_favoritos = len(df_favorites[df_favorites['total_favorites'] > 0])
+                st.metric("Usuarios con Favoritos", usuarios_con_favoritos)
+                
+            with col3:
+                promedio_favoritos = df_favorites['total_favorites'].mean()
+                st.metric("Promedio Favoritos/Usuario", f"{promedio_favoritos:.1f}")
+                
+            with col4:
+                max_favoritos = df_favorites['total_favorites'].max()
+                st.metric("Máximo Favoritos", max_favoritos)
+            
+            # Top usuarios con más favoritos
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.subheader('Top Usuarios con Más Favoritos')
+                top_favoritos = df_favorites.nlargest(10, 'total_favorites')[['email', 'total_favorites']]
+                top_favoritos = top_favoritos.sort_values('total_favorites', ascending=True)
+                
+                fig_top_favoritos = px.bar(
+                    x=top_favoritos['total_favorites'],
+                    y=top_favoritos['email'],
+                    orientation='h',
+                    title="Top 10 Usuarios con Más Favoritos",
+                    color=top_favoritos['total_favorites'],
+                    color_continuous_scale='Reds'
+                )
+                fig_top_favoritos.update_layout(height=400)
+                st.plotly_chart(fig_top_favoritos, use_container_width=True)
+            
+            with col2:
+                st.subheader('Distribución de Favoritos')
+                
+                # Crear rangos de favoritos
+                df_favorites['rango_favoritos'] = pd.cut(df_favorites['total_favorites'], 
+                                                       bins=[0, 5, 10, 20, 30, 50, 100], 
+                                                       labels=['0-5', '6-10', '11-20', '21-30', '31-50', '50+'])
+                
+                distribucion = df_favorites['rango_favoritos'].value_counts().sort_index()
+                
+                fig_distribucion = px.pie(
+                    values=distribucion.values,
+                    names=distribucion.index,
+                    title="Distribución de Usuarios por Cantidad de Favoritos"
+                )
+                st.plotly_chart(fig_distribucion, use_container_width=True)
+            
+            # Análisis geográfico de favoritos
+            st.subheader('Favoritos por Ubicación')
+            
+            if 'lat' in df_favorites.columns and 'lng' in df_favorites.columns:
+                fig_favoritos_mapa = px.scatter_mapbox(
+                    df_favorites,
+                    lat='lat',
+                    lon='lng',
+                    size='total_favorites',
+                    color='total_favorites',
+                    hover_name='formatted_address',
+                    zoom=10,
+                    title="Mapa de Favoritos por Usuario",
+                    color_continuous_scale='Reds'
+                )
+                fig_favoritos_mapa.update_layout(
+                    mapbox_style="open-street-map",
+                    height=500
+                )
+                st.plotly_chart(fig_favoritos_mapa, use_container_width=True)
+            
+        except FileNotFoundError:
+            st.error("No se encontró el archivo favorite_collapsed.csv")
+        except Exception as e:
+            st.error(f"Error al procesar los datos de favoritos: {e}")
+            
     except FileNotFoundError:
         st.error("No se encontró el archivo mixpanel_applicants_collapsed.csv")
     except Exception as e:
