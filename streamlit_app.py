@@ -360,6 +360,48 @@ with tab2:
         )
         st.plotly_chart(fig_comportamiento, use_container_width=True)
         
+        # Tabla de usuarios y su comportamiento
+        st.subheader('Tabla de Comportamiento por Usuario')
+        
+        # Crear tabla con métricas de comportamiento por usuario
+        df_comportamiento_usuarios = df_mixpanel.groupby('email').agg({
+            'click_dashboard_menu': 'sum',
+            'click_reg_user-log-in_log-in-button': 'sum',
+            'click_school_pin': 'sum',
+            'open_school_profile': 'sum',
+            'close_school_profile': 'sum',
+            'favorite_school_from_list': 'sum',
+            'remove_favorite_school_from_list': 'sum',
+            'login': 'sum',
+            'map_filter_click': 'sum',
+            'map_grade_click': 'sum'
+        }).reset_index()
+        
+        # Calcular total de interacciones por usuario
+        df_comportamiento_usuarios['total_interacciones'] = df_comportamiento_usuarios.drop('email', axis=1).sum(axis=1)
+        
+        # Ordenar por total de interacciones (más activos primero)
+        df_comportamiento_usuarios = df_comportamiento_usuarios.sort_values('total_interacciones', ascending=False)
+        
+        # Renombrar columnas para mejor visualización
+        df_comportamiento_usuarios = df_comportamiento_usuarios.rename(columns={
+            'email': 'Usuario',
+            'click_dashboard_menu': 'Clicks Menú',
+            'click_reg_user-log-in_log-in-button': 'Clicks Login',
+            'click_school_pin': 'Clicks Pins',
+            'open_school_profile': 'Perfiles Abiertos',
+            'close_school_profile': 'Perfiles Cerrados',
+            'favorite_school_from_list': 'Favoritos Agregados',
+            'remove_favorite_school_from_list': 'Favoritos Removidos',
+            'login': 'Logins',
+            'map_filter_click': 'Filtros Mapa',
+            'map_grade_click': 'Clicks Grado',
+            'total_interacciones': 'Total Interacciones'
+        })
+        
+        # Mostrar tabla
+        st.dataframe(df_comportamiento_usuarios, hide_index=True)
+        
         # Análisis de contenido visitado
         st.subheader('Contenido Más Visitado')
         
