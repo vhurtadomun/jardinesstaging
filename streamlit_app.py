@@ -299,11 +299,13 @@ with tab1:
     st.dataframe(df_filtrado, hide_index=True)
 
 with tab2:
+    st.write("🔍 Debug: Pestaña 2 cargada")
     st.title('📊 Estadísticas de Uso de la Aplicación')
     
     # Leer datos de Mixpanel
     try:
         df_mixpanel = pd.read_csv('inputs/mixpanel_applicants_collapsed.csv')
+        st.success(f"✅ Archivo leído: {len(df_mixpanel)} filas, {len(df_mixpanel.columns)} columnas")
         
         # Métricas principales
         st.subheader('📈 Métricas Principales')
