@@ -308,7 +308,7 @@ with tab2:
         # Métricas principales
         st.subheader('Métricas Principales')
         
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3 = st.columns(3)
         
         with col1:
             # Combinar usuarios únicos de Mixpanel y Explored Campus
@@ -325,16 +325,14 @@ with tab2:
             total_usuarios_unicos = len(usuarios_mixpanel.union(usuarios_explored))
             st.metric("Total Usuarios", total_usuarios_unicos)
             
-        with col2:
-            total_applicants = df_mixpanel['applicant_id'].nunique()
-            st.metric("Total Applicants", total_applicants)
+
             
-        with col3:
+        with col2:
             total_interacciones = df_mixpanel[['click_dashboard_menu', 'click_reg_user-log-in_log-in-button', 
                                              'click_school_pin', 'open_school_profile', 'favorite_school_from_list']].sum().sum()
             st.metric("Total Interacciones", f"{total_interacciones:,}")
             
-        with col4:
+        with col3:
             avg_interacciones = total_interacciones / total_usuarios_unicos if total_usuarios_unicos > 0 else 0
             st.metric("Promedio Interacciones/Usuario", f"{avg_interacciones:.1f}")
         
