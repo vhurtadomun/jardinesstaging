@@ -228,7 +228,7 @@ def obtener_ultima_actualizacion():
 # Header azul bonito
 st.markdown("""
     <div class="header">
-        <h1>📊 Seguimiento jardines Bogotá </h1>
+        <h1>Seguimiento jardines Bogotá </h1>
     </div>
 """, unsafe_allow_html=True)
 
@@ -244,7 +244,7 @@ else:
     st.info(mensaje_fecha)
 
 # Crear pestañas para organizar el contenido
-tab1, tab2 = st.tabs(["📝 Notas de Usuarios", "📊 Estadísticas de Uso"])
+tab1, tab2 = st.tabs(["Notas de Usuarios", "📊 Estadísticas de Uso"])
 
 with tab1:
     # Título simple adicional
@@ -299,14 +299,14 @@ with tab1:
     st.dataframe(df_filtrado, hide_index=True)
 
 with tab2:
-    st.title('📊 Estadísticas de Uso de la Aplicación')
+    st.title('Estadísticas de Uso de la Aplicación')
     
     # Leer datos de Mixpanel
     try:
         df_mixpanel = pd.read_csv('inputs/mixpanel_applicants_collapsed.csv')
         
         # Métricas principales
-        st.subheader('📈 Métricas Principales')
+        st.subheader('Métricas Principales')
         
         col1, col2, col3, col4 = st.columns(4)
         
@@ -328,7 +328,7 @@ with tab2:
             st.metric("Promedio Interacciones/Usuario", f"{avg_interacciones:.1f}")
         
         # Análisis de comportamiento
-        st.subheader('🎯 Análisis de Comportamiento')
+        st.subheader('Análisis de Comportamiento')
         
         # Calcular métricas de comportamiento
         comportamiento_metrics = {
@@ -361,7 +361,7 @@ with tab2:
         st.plotly_chart(fig_comportamiento, use_container_width=True)
         
         # Análisis de contenido visitado
-        st.subheader('📚 Contenido Más Visitado')
+        st.subheader('Contenido Más Visitado')
         
         contenido_metrics = {
             'Liderazgo Escolar': df_mixpanel['sp_school_leadership'].sum(),
@@ -384,7 +384,7 @@ with tab2:
             
         with col2:
             # Top usuarios más activos
-            st.subheader('👥 Usuarios Más Activos')
+            st.subheader('Usuarios Más Activos')
             df_usuarios_activos = df_mixpanel.groupby('email').agg({
                 'click_dashboard_menu': 'sum',
                 'click_school_pin': 'sum',
@@ -402,7 +402,7 @@ with tab2:
             st.plotly_chart(fig_usuarios, use_container_width=True)
         
         # Análisis geográfico
-        st.subheader('🗺️ Análisis Geográfico')
+        st.subheader('Análisis Geográfico')
         
         # Crear mapa de calor de actividad
         if 'lat' in df_mixpanel.columns and 'lng' in df_mixpanel.columns:
@@ -429,7 +429,7 @@ with tab2:
         
         # Estadísticas por área
         if 'area_id' in df_mixpanel.columns:
-            st.subheader('🏘️ Actividad por Área')
+            st.subheader('Actividad por Área')
             actividad_por_area = df_mixpanel.groupby('area_id').agg({
                 'click_dashboard_menu': 'sum',
                 'click_school_pin': 'sum',
@@ -445,7 +445,7 @@ with tab2:
             st.plotly_chart(fig_area, use_container_width=True)
         
         # Análisis de Favoritos
-        st.subheader('❤️ Análisis de Favoritos')
+        st.subheader('Análisis de Favoritos')
         
         try:
             df_favorites = pd.read_csv('inputs/favorite_collapsed.csv')
@@ -472,7 +472,7 @@ with tab2:
             col1, col2 = st.columns(2)
             
             with col1:
-                st.subheader('👑 Top Usuarios con Más Favoritos')
+                st.subheader('Top Usuarios con Más Favoritos')
                 top_favoritos = df_favorites.nlargest(10, 'total_favorites')[['email', 'total_favorites']]
                 top_favoritos = top_favoritos.sort_values('total_favorites', ascending=True)
                 
@@ -488,7 +488,7 @@ with tab2:
                 st.plotly_chart(fig_top_favoritos, use_container_width=True)
             
             with col2:
-                st.subheader('📊 Distribución de Favoritos')
+                st.subheader('Distribución de Favoritos')
                 
                 # Crear rangos de favoritos
                 df_favorites['rango_favoritos'] = pd.cut(df_favorites['total_favorites'], 
@@ -505,7 +505,7 @@ with tab2:
                 st.plotly_chart(fig_distribucion, use_container_width=True)
             
             # Análisis geográfico de favoritos
-            st.subheader('🗺️ Favoritos por Ubicación')
+            st.subheader('Favoritos por Ubicación')
             
             if 'lat' in df_favorites.columns and 'lng' in df_favorites.columns:
                 fig_favoritos_mapa = px.scatter_mapbox(
@@ -560,7 +560,7 @@ with tab2:
             col1, col2 = st.columns(2)
             
             with col1:
-                st.subheader('📊 Comparación de Exploración')
+                st.subheader('Comparación de Exploración')
                 
                 exploracion_data = {
                     'Clicks en Tarjetas': df_explored['click_campus_card'].sum(),
@@ -576,7 +576,7 @@ with tab2:
                 st.plotly_chart(fig_exploracion, use_container_width=True)
             
             with col2:
-                st.subheader('👥 Top Exploradores')
+                st.subheader('Top Exploradores')
                 
                 # Calcular actividad total de exploración por usuario
                 df_explored['actividad_exploracion'] = df_explored['click_campus_card'] + df_explored['click_campus_pin']
@@ -595,7 +595,7 @@ with tab2:
                 st.plotly_chart(fig_exploradores, use_container_width=True)
             
             # Análisis geográfico de exploración
-            st.subheader('🗺️ Exploración por Ubicación')
+            st.subheader('Exploración por Ubicación')
             
             if 'lat' in df_explored.columns and 'lng' in df_explored.columns:
                 # Calcular actividad total de exploración
