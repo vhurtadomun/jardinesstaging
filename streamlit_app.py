@@ -325,11 +325,6 @@ with tab2:
             total_usuarios_unicos = len(usuarios_mixpanel.union(usuarios_explored))
             st.metric("Total Usuarios", total_usuarios_unicos)
             
-            # Debug: mostrar información
-            st.write(f"Usuarios Mixpanel: {len(usuarios_mixpanel)}")
-            st.write(f"Usuarios Explored: {len(usuarios_explored)}")
-            st.write(f"Total únicos: {total_usuarios_unicos}")
-            
         with col2:
             total_applicants = df_mixpanel['applicant_id'].nunique()
             st.metric("Total Applicants", total_applicants)
