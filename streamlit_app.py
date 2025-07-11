@@ -443,6 +443,210 @@ with tab2:
                 title="Actividad por Área ID"
             )
             st.plotly_chart(fig_area, use_container_width=True)
+        
+        # Análisis de Favoritos
+        st.subheader('❤️ Análisis de Favoritos')
+        
+        try:
+            df_favorites = pd.read_csv('inputs/favorite_collapsed.csv')
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                total_favoritos = df_favorites['total_favorites'].sum()
+                st.metric("Total Favoritos", f"{total_favoritos:,}")
+                
+            with col2:
+                usuarios_con_favoritos = len(df_favorites[df_favorites['total_favorites'] > 0])
+                st.metric("Usuarios con Favoritos", usuarios_con_favoritos)
+                
+            with col3:
+                promedio_favoritos = df_favorites['total_favorites'].mean()
+                st.metric("Promedio Favoritos/Usuario", f"{promedio_favoritos:.1f}")
+                
+            with col4:
+                max_favoritos = df_favorites['total_favorites'].max()
+                st.metric("Máximo Favoritos", max_favoritos)
+            
+            # Top usuarios con más favoritos
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.subheader('👑 Top Usuarios con Más Favoritos')
+                top_favoritos = df_favorites.nlargest(10, 'total_favorites')[['email', 'total_favorites']]
+                top_favoritos = top_favoritos.sort_values('total_favorites', ascending=True)
+                
+                fig_top_favoritos = px.bar(
+                    x=top_favoritos['total_favorites'],
+                    y=top_favoritos['email'],
+                    orientation='h',
+                    title="Top 10 Usuarios con Más Favoritos",
+                    color=top_favoritos['total_favorites'],
+                    color_continuous_scale='Reds'
+                )
+                fig_top_favoritos.update_layout(height=400)
+                st.plotly_chart(fig_top_favoritos, use_container_width=True)
+            
+            with col2:
+                st.subheader('📊 Distribución de Favoritos')
+                
+                # Crear rangos de favoritos
+                df_favorites['rango_favoritos'] = pd.cut(df_favorites['total_favorites'], 
+                                                       bins=[0, 5, 10, 20, 30, 50, 100], 
+                                                       labels=['0-5', '6-10', '11-20', '21-30', '31-50', '50+'])
+                
+                distribucion = df_favorites['rango_favoritos'].value_counts().sort_index()
+                
+                fig_distribucion = px.pie(
+                    values=distribucion.values,
+                    names=distribucion.index,
+                    title="Distribución de Usuarios por Cantidad de Favoritos"
+                )
+                st.plotly_chart(fig_distribucion, use_container_width=True)
+            
+            # Análisis geográfico de favoritos
+            st.subheader('🗺️ Favoritos por Ubicación')
+            
+            if 'lat' in df_favorites.columns and 'lng' in df_favorites.columns:
+                fig_favoritos_mapa = px.scatter_mapbox(
+                    df_favorites,
+                    lat='lat',
+                    lon='lng',
+                    size='total_favorites',
+                    color='total_favorites',
+                    hover_name='formatted_address',
+                    zoom=10,
+                    title="Mapa de Favoritos por Usuario",
+                    color_continuous_scale='Reds'
+                )
+                fig_favoritos_mapa.update_layout(
+                    mapbox_style="open-street-map",
+                    height=500
+                )
+                st.plotly_chart(fig_favoritos_mapa, use_container_width=True)
+            
+            # Estadísticas por área de favoritos
+            if 'area_id' in df_favorites.columns:
+                st.subheader('🏘️ Favoritos por Área')
+                favoritos_por_area = df_favorites.groupby('area_id')['total_favorites'].sum().sort_values(ascending=False)
+                
+                fig_favoritos_area = px.bar(
+                    x=favoritos_por_area.index,
+                    y=favoritos_por_area.values,
+                    title="Total de Favoritos por Área ID"
+                )
+                st.plotly_chart(fig_favoritos_area, use_container_width=True)
+                
+        except FileNotFoundError:
+            st.error("No se encontró el archivo favorite_collapsed.csv")
+        except Exception as e:
+            st.error(f"Error al procesar los datos de favoritos: {e}")
+        
+        # Análisis de Exploración de Campus
+        st.subheader('🏫 Análisis de Exploración de Campus')
+        
+        try:
+            df_explored = pd.read_csv('inputs/explored_campus_collapsed.csv')
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                total_campus_cards = df_explored['click_campus_card'].sum()
+                st.metric("Clicks en Tarjetas Campus", f"{total_campus_cards:,}")
+                
+            with col2:
+                total_campus_pins = df_explored['click_campus_pin'].sum()
+                st.metric("Clicks en Pins Campus", f"{total_campus_pins:,}")
+                
+            with col3:
+                total_exploraciones = total_campus_cards + total_campus_pins
+                st.metric("Total Exploraciones", f"{total_exploraciones:,}")
+                
+            with col4:
+                usuarios_explorando = len(df_explored[(df_explored['click_campus_card'] > 0) | (df_explored['click_campus_pin'] > 0)])
+                st.metric("Usuarios Explorando", usuarios_explorando)
+            
+            # Comparación de tipos de exploración
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.subheader('📊 Comparación de Exploración')
+                
+                exploracion_data = {
+                    'Clicks en Tarjetas': df_explored['click_campus_card'].sum(),
+                    'Clicks en Pins': df_explored['click_campus_pin'].sum()
+                }
+                
+                fig_exploracion = px.pie(
+                    values=list(exploracion_data.values()),
+                    names=list(exploracion_data.keys()),
+                    title="Distribución de Tipos de Exploración",
+                    color_discrete_sequence=['#FF6B6B', '#4ECDC4']
+                )
+                st.plotly_chart(fig_exploracion, use_container_width=True)
+            
+            with col2:
+                st.subheader('👥 Top Exploradores')
+                
+                # Calcular actividad total de exploración por usuario
+                df_explored['actividad_exploracion'] = df_explored['click_campus_card'] + df_explored['click_campus_pin']
+                top_exploradores = df_explored.nlargest(10, 'actividad_exploracion')[['email', 'actividad_exploracion']]
+                top_exploradores = top_exploradores.sort_values('actividad_exploracion', ascending=True)
+                
+                fig_exploradores = px.bar(
+                    x=top_exploradores['actividad_exploracion'],
+                    y=top_exploradores['email'],
+                    orientation='h',
+                    title="Top 10 Usuarios Más Exploradores",
+                    color=top_exploradores['actividad_exploracion'],
+                    color_continuous_scale='Greens'
+                )
+                fig_exploradores.update_layout(height=400)
+                st.plotly_chart(fig_exploradores, use_container_width=True)
+            
+            # Análisis geográfico de exploración
+            st.subheader('🗺️ Exploración por Ubicación')
+            
+            if 'lat' in df_explored.columns and 'lng' in df_explored.columns:
+                # Calcular actividad total de exploración
+                df_explored['actividad_exploracion'] = df_explored['click_campus_card'] + df_explored['click_campus_pin']
+                
+                fig_exploracion_mapa = px.scatter_mapbox(
+                    df_explored,
+                    lat='lat',
+                    lon='lng',
+                    size='actividad_exploracion',
+                    color='actividad_exploracion',
+                    hover_name='formatted_address',
+                    zoom=10,
+                    title="Mapa de Exploración de Campus por Usuario",
+                    color_continuous_scale='Greens'
+                )
+                fig_exploracion_mapa.update_layout(
+                    mapbox_style="open-street-map",
+                    height=500
+                )
+                st.plotly_chart(fig_exploracion_mapa, use_container_width=True)
+            
+            # Estadísticas por área de exploración
+            if 'area_id' in df_explored.columns:
+                st.subheader('🏘️ Exploración por Área')
+                exploracion_por_area = df_explored.groupby('area_id').agg({
+                    'click_campus_card': 'sum',
+                    'click_campus_pin': 'sum'
+                }).sum(axis=1).sort_values(ascending=False)
+                
+                fig_exploracion_area = px.bar(
+                    x=exploracion_por_area.index,
+                    y=exploracion_por_area.values,
+                    title="Total de Exploraciones por Área ID"
+                )
+                st.plotly_chart(fig_exploracion_area, use_container_width=True)
+                
+        except FileNotFoundError:
+            st.error("No se encontró el archivo explored_campus_collapsed.csv")
+        except Exception as e:
+            st.error(f"Error al procesar los datos de exploración: {e}")
             
     except FileNotFoundError:
         st.error("No se encontró el archivo mixpanel_applicants_collapsed.csv")
