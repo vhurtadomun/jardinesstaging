@@ -244,7 +244,7 @@ else:
     st.info(mensaje_fecha)
 
 # Crear pestañas para organizar el contenido
-tab1, tab2 = st.tabs(["Notas de Usuarios", "📊 Estadísticas de Uso"])
+tab1, tab2 = st.tabs(["Notas de Usuarios", "Estadísticas de Uso"])
 
 with tab1:
     # Título simple adicional
@@ -462,7 +462,71 @@ with tab2:
             )
             st.plotly_chart(fig_area, use_container_width=True)
         
-        # Análisis de Favoritos
+    
+        
+        # Análisis de Exploración de Campus
+        st.subheader('Análisis de Exploración de Campus')
+        
+        try:
+            df_explored = pd.read_csv('inputs/explored_campus_collapsed.csv')
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                total_campus_cards = df_explored['click_campus_card'].sum()
+                st.metric("Clicks en Tarjetas Campus", f"{total_campus_cards:,}")
+                
+            with col2:
+                total_campus_pins = df_explored['click_campus_pin'].sum()
+                st.metric("Clicks en Pins Campus", f"{total_campus_pins:,}")
+                
+            with col3:
+                total_exploraciones = total_campus_cards + total_campus_pins
+                st.metric("Total Exploraciones", f"{total_exploraciones:,}")
+                
+            with col4:
+                usuarios_explorando = len(df_explored[(df_explored['click_campus_card'] > 0) | (df_explored['click_campus_pin'] > 0)])
+                st.metric("Usuarios Explorando", usuarios_explorando)
+            
+            # Comparación de tipos de exploración
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.subheader('Comparación de Exploración')
+                
+                exploracion_data = {
+                    'Clicks en Tarjetas': df_explored['click_campus_card'].sum(),
+                    'Clicks en Pins': df_explored['click_campus_pin'].sum()
+                }
+                
+                fig_exploracion = px.pie(
+                    values=list(exploracion_data.values()),
+                    names=list(exploracion_data.keys()),
+                    title="Distribución de Tipos de Exploración",
+                    color_discrete_sequence=['#FF6B6B', '#4ECDC4']
+                )
+                st.plotly_chart(fig_exploracion, use_container_width=True)
+            
+            with col2:
+                st.subheader('Top Exploradores')
+                
+                # Calcular actividad total de exploración por usuario
+                df_explored['actividad_exploracion'] = df_explored['click_campus_card'] + df_explored['click_campus_pin']
+                top_exploradores = df_explored.nlargest(10, 'actividad_exploracion')[['email', 'actividad_exploracion']]
+                top_exploradores = top_exploradores.sort_values('actividad_exploracion', ascending=True)
+                
+                fig_exploradores = px.bar(
+                    x=top_exploradores['actividad_exploracion'],
+                    y=top_exploradores['email'],
+                    orientation='h',
+                    title="Top 10 Usuarios Más Exploradores",
+                    color=top_exploradores['actividad_exploracion'],
+                    color_continuous_scale='Greens'
+                )
+                fig_exploradores.update_layout(height=400)
+                st.plotly_chart(fig_exploradores, use_container_width=True)
+            
+      # Análisis de Favoritos
         st.subheader('Análisis de Favoritos')
         
         try:
@@ -543,83 +607,10 @@ with tab2:
                 )
                 st.plotly_chart(fig_favoritos_mapa, use_container_width=True)
             
-
-                
         except FileNotFoundError:
             st.error("No se encontró el archivo favorite_collapsed.csv")
         except Exception as e:
             st.error(f"Error al procesar los datos de favoritos: {e}")
-        
-        # Análisis de Exploración de Campus
-        st.subheader('🏫 Análisis de Exploración de Campus')
-        
-        try:
-            df_explored = pd.read_csv('inputs/explored_campus_collapsed.csv')
-            
-            col1, col2, col3, col4 = st.columns(4)
-            
-            with col1:
-                total_campus_cards = df_explored['click_campus_card'].sum()
-                st.metric("Clicks en Tarjetas Campus", f"{total_campus_cards:,}")
-                
-            with col2:
-                total_campus_pins = df_explored['click_campus_pin'].sum()
-                st.metric("Clicks en Pins Campus", f"{total_campus_pins:,}")
-                
-            with col3:
-                total_exploraciones = total_campus_cards + total_campus_pins
-                st.metric("Total Exploraciones", f"{total_exploraciones:,}")
-                
-            with col4:
-                usuarios_explorando = len(df_explored[(df_explored['click_campus_card'] > 0) | (df_explored['click_campus_pin'] > 0)])
-                st.metric("Usuarios Explorando", usuarios_explorando)
-            
-            # Comparación de tipos de exploración
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.subheader('Comparación de Exploración')
-                
-                exploracion_data = {
-                    'Clicks en Tarjetas': df_explored['click_campus_card'].sum(),
-                    'Clicks en Pins': df_explored['click_campus_pin'].sum()
-                }
-                
-                fig_exploracion = px.pie(
-                    values=list(exploracion_data.values()),
-                    names=list(exploracion_data.keys()),
-                    title="Distribución de Tipos de Exploración",
-                    color_discrete_sequence=['#FF6B6B', '#4ECDC4']
-                )
-                st.plotly_chart(fig_exploracion, use_container_width=True)
-            
-            with col2:
-                st.subheader('Top Exploradores')
-                
-                # Calcular actividad total de exploración por usuario
-                df_explored['actividad_exploracion'] = df_explored['click_campus_card'] + df_explored['click_campus_pin']
-                top_exploradores = df_explored.nlargest(10, 'actividad_exploracion')[['email', 'actividad_exploracion']]
-                top_exploradores = top_exploradores.sort_values('actividad_exploracion', ascending=True)
-                
-                fig_exploradores = px.bar(
-                    x=top_exploradores['actividad_exploracion'],
-                    y=top_exploradores['email'],
-                    orientation='h',
-                    title="Top 10 Usuarios Más Exploradores",
-                    color=top_exploradores['actividad_exploracion'],
-                    color_continuous_scale='Greens'
-                )
-                fig_exploradores.update_layout(height=400)
-                st.plotly_chart(fig_exploradores, use_container_width=True)
-            
-
-            
-
-                
-        except FileNotFoundError:
-            st.error("No se encontró el archivo explored_campus_collapsed.csv")
-        except Exception as e:
-            st.error(f"Error al procesar los datos de exploración: {e}")
             
     except FileNotFoundError:
         st.error("No se encontró el archivo mixpanel_applicants_collapsed.csv")
